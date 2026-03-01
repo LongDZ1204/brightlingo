@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrightLingo | Master English, Master Life</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="fixed w-full top-0 bg-white/90 backdrop-blur-md shadow-sm z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <span class="text-2xl font-extrabold text-blue-900"><i class="fa-solid fa-bolt text-yellow-500 mr-2"></i>BrightLingo</span>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#about" class="text-gray-600 hover:text-blue-900 font-medium transition">Giới thiệu</a>
+                    <a href="#videos" class="text-gray-600 hover:text-blue-900 font-medium transition">Bài giảng</a>
+                    <a href="#documents" class="text-gray-600 hover:text-blue-900 font-medium transition">Tài liệu</a>
+                    <a href="#exams" class="text-gray-600 hover:text-blue-900 font-medium transition">Đề thi</a>
+                </nav>
+                <div class="hidden md:flex">
+                    <a href="https://zalo.me/yourphonenumber" target="_blank" class="bg-blue-900 text-white px-5 py-2 rounded-full font-semibold hover:bg-blue-800 transition shadow-md">
+                        Học thử ngay
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-blue-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-blue-900 tracking-tight mb-6">
+                Master English, <br class="hidden md:block" /> <span class="text-yellow-500">Master Life.</span>
+            </h1>
+            <p class="mt-4 max-w-2xl text-xl text-gray-600 mx-auto mb-10">
+                Hành trình chinh phục ngôn ngữ cùng BrightLingo. Đơn giản, thực chiến và hiệu quả. Không học vẹt, học để làm chủ cuộc đời.
+            </p>
+            <a href="#documents" class="inline-block bg-blue-900 text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-blue-800 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                Khám phá tài liệu <i class="fa-solid fa-arrow-down ml-2"></i>
+            </a>
+        </div>
+    </section>
+
+    <section id="about" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800" alt="Teacher" class="rounded-2xl shadow-2xl object-cover h-[400px] w-full">
+                </div>
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-6">Chào bạn, tôi là Giáo viên của BrightLingo</h2>
+                    <div class="space-y-4 text-gray-600 text-lg">
+                        <p><i class="fa-solid fa-check text-green-500 mr-2"></i> <strong>Kinh nghiệm:</strong> 5+ năm giảng dạy Tiếng Anh thực chiến.</p>
+                        <p><i class="fa-solid fa-check text-green-500 mr-2"></i> <strong>Thành tựu:</strong> Giúp 500+ học sinh mất gốc tự tin giao tiếp và đạt Target IELTS/TOEIC.</p>
+                        <p><i class="fa-solid fa-check text-green-500 mr-2"></i> <strong>Phương pháp:</strong> Tập trung vào tư duy ngôn ngữ, lược bỏ ngữ pháp rườm rà. Học ít hiểu nhiều, ứng dụng ngay.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="videos" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-blue-900">Lớp Học Thu Nhỏ</h2>
+                <p class="text-gray-600 mt-2">Chọn chủ đề bạn muốn học hôm nay</p>
+            </div>
+            
+            <div id="video-tabs" class="flex flex-wrap justify-center gap-4 mb-10">
+                </div>
+
+            <div id="video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 fade-in">
+                </div>
+        </div>
+    </section>
+
+    <section id="documents" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-blue-900">Kho Tài Liệu</h2>
+            </div>
+
+            <div class="flex justify-center mb-8 border-b border-gray-200">
+                <button onclick="switchDocTab('giangday')" id="tab-giangday" class="px-6 py-3 text-lg font-semibold border-b-2 tab-active transition">Tài liệu giảng dạy</button>
+                <button onclick="switchDocTab('thamkhao')" id="tab-thamkhao" class="px-6 py-3 text-lg font-semibold border-b-2 border-transparent text-gray-500 hover:text-blue-900 transition">Tài liệu tham khảo</button>
+            </div>
+
+            <div id="doc-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
+                </div>
+        </div>
+    </section>
+
+    <section id="exams" class="py-20 bg-blue-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-blue-900">Đấu Trường Đề Thi</h2>
+            </div>
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-blue-900">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Tên Đề Thi</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Cấp Độ</th>
+                            <th class="px-6 py-4 text-right text-sm font-semibold text-white uppercase tracking-wider">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exam-list" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-6 md:mb-0 text-center md:text-left">
+                <h3 class="text-2xl font-bold text-yellow-500 mb-2">BrightLingo</h3>
+                <p class="text-gray-400">Master English, Master Life.</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-white text-2xl transition"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white text-2xl transition"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white text-2xl transition"><i class="fa-brands fa-tiktok"></i></a>
+            </div>
+        </div>
+        <div class="text-center text-gray-500 mt-8 text-sm">
+            &copy; 2026 BrightLingo. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

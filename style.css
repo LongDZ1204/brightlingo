@@ -1,0 +1,35 @@
+/* style.css */
+html {
+  scroll-behavior: smooth; /* Hiệu ứng cuộn mượt khi bấm menu */
+}
+
+/* Ẩn thanh cuộn cho các khu vực ngang (nếu có) trên mobile */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Hiệu ứng mờ dần khi chuyển Tab */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Nút Tab đang được chọn (Active) */
+.tab-active {
+  background-color: #1e3a8a; /* Xanh Navy đậm */
+  color: white;
+  border-color: #1e3a8a;
+}
+.tab-inactive {
+  background-color: transparent;
+  color: #4b5563;
+  border-color: #d1d5db;
+}
