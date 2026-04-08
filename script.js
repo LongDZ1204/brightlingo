@@ -13,16 +13,25 @@ function getYouTubeID(url) {
     return (match && match[2].length === 11) ? match[2] : null;
 }
 
+function getDriveID(url) {
+    if(!url) return null;
+    const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
+}
+
 // Hàm fetch API ẩn của Google
 async function fetchSheetData(sheetName) {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
     try {
         const response = await fetch(url);
         const text = await response.text();
-        // Google trả về 1 chuỗi text bọc JSON, cần cắt bỏ phần thừa để lấy JSON chuẩn
-        const jsonString = text.substring(47, text.length - 2); 
-        const json = JSON.parse(jsonString);
-        return json.table.rows; // Trả về các hàng dữ liệu
+        // Cắt chuỗi an toàn bằng Regex để tránh lỗi Google thêm khoảng trắng/xuống dòng
+        const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
+        if (match && match[1]) {
+            const json = JSON.parse(match[1]);
+            return json.table.rows || [];
+        }
+        return [];
     } catch (error) {
         console.error(`Lỗi tải dữ liệu từ sheet ${sheetName}:`, error);
         return [];
@@ -32,14 +41,15 @@ async function fetchSheetData(sheetName) {
 // ==========================================
 // KHỞI CHẠY TẢI DỮ LIỆU TỪ INTERNET
 // ==========================================
-let videoData = [], docData = [], examData = [];
+let videoData = [], docData = [], examData = [], studentVideoData = [];
 
 window.onload = async () => {
-    // Tải đồng loạt 3 sheet
-    const [videoRows, docRows, examRows] = await Promise.all([
+    // Tải đồng loạt các sheet
+    const [videoRows, docRows, examRows, studentRows] = await Promise.all([
         fetchSheetData('Videos'),
         fetchSheetData('Documents'),
-        fetchSheetData('Exams')
+        fetchSheetData('Exams'),
+        fetchSheetData('StudentVideos')
     ]);
 
     // Xử lý data Video (Cột 0: Tên, Cột 1: Link, Cột 2: Danh mục)
@@ -47,26 +57,34 @@ window.onload = async () => {
         title: row.c[0]?.v || '',
         link: row.c[1]?.v || '',
         category: row.c[2]?.v || 'Khác'
-    })).filter(v => v.title !== '');
+    })).filter(v => v.title !== '' && v.title.toLowerCase() !== 'tên video');
 
-    // Xử lý data Documents (Cột 0: Tên, Cột 1: Link, Cột 2: Loại)
+    // Xử lý data Documents (Cột 0: Tên, Cột 1: Link, Cột 2: Loại, Cột 3: Hình ảnh)
     docData = docRows.map(row => ({
         title: row.c[0]?.v || '',
         link: row.c[1]?.v || '#',
-        type: row.c[2]?.v || 'thamkhao'
-    })).filter(d => d.title !== '');
+        type: row.c[2]?.v || 'thamkhao',
+        image: row.c[3]?.v || ''
+    })).filter(d => d.title !== '' && !d.title.toLowerCase().includes('tên tài liệu'));
 
     // Xử lý data Exams (Cột 0: Tên, Cột 1: Cấp độ, Cột 2: Link)
     examData = examRows.map(row => ({
         title: row.c[0]?.v || '',
         level: row.c[1]?.v || 'Cơ bản',
         link: row.c[2]?.v || '#'
-    })).filter(e => e.title !== '');
+    })).filter(e => e.title !== '' && !e.title.toLowerCase().includes('tên đề thi'));
+
+    // Xử lý data Student Videos
+    studentVideoData = studentRows.map(row => ({
+        title: row.c[0]?.v || '',
+        link: row.c[1]?.v || ''
+    })).filter(v => v.title !== '' && !v.title.toLowerCase().includes('tên/mô tả video'));
 
     // Render ra giao diện (Giữ nguyên logic của Phase 2)
     renderVideoTabs();
     renderVideos();
-    switchDocTab('giangday');
+    renderStudentVideos();
+    switchDocTab('thamkhao');
     renderExams();
 };
 
@@ -100,12 +118,25 @@ function renderVideos() {
     }
 
     filteredVideos.forEach(video => {
-        const videoId = getYouTubeID(video.link);
+        const youtubeId = getYouTubeID(video.link);
+        const driveId = getDriveID(video.link);
+        let videoHtml = '';
+
+        if (youtubeId) {
+            videoHtml = `<iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${youtubeId}" title="${video.title}" frameborder="0" allowfullscreen></iframe>`;
+        } else if (driveId) {
+            videoHtml = `<iframe class="absolute top-0 left-0 w-full h-full" src="https://drive.google.com/file/d/${driveId}/preview" title="${video.title}" frameborder="0" allow="autoplay; fullscreen"></iframe>`;
+        } else if (video.link.includes('.mp4')) {
+            videoHtml = `<video class="absolute top-0 left-0 w-full h-full object-cover" src="${video.link}" controls></video>`;
+        } else {
+            videoHtml = `<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">Không tìm thấy video</div>`;
+        }
+
         const card = document.createElement('div');
         card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1';
         card.innerHTML = `
             <div class="relative w-full" style="padding-top: 56.25%;">
-                <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${videoId}" title="${video.title}" frameborder="0" allowfullscreen></iframe>
+                ${videoHtml}
             </div>
             <div class="p-5">
                 <span class="inline-block px-3 py-1 mb-2 text-xs font-semibold text-blue-900 bg-blue-100 rounded-full">${video.category}</span>
@@ -116,7 +147,49 @@ function renderVideos() {
     });
 }
 
-let currentDocType = 'giangday';
+function renderStudentVideos() {
+    const grid = document.getElementById('student-video-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    
+    if(studentVideoData.length === 0) {
+        grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-8">Đang cập nhật sản phẩm học sinh...</p>';
+        return;
+    }
+
+    studentVideoData.forEach(video => {
+        const youtubeId = getYouTubeID(video.link);
+        const driveId = getDriveID(video.link);
+        let videoHtml = '';
+
+        if (youtubeId) {
+            videoHtml = `<iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/${youtubeId}" title="${video.title}" frameborder="0" allowfullscreen></iframe>`;
+        } else if (driveId) {
+            videoHtml = `<iframe class="absolute top-0 left-0 w-full h-full" src="https://drive.google.com/file/d/${driveId}/preview" title="${video.title}" frameborder="0" allow="autoplay; fullscreen"></iframe>`;
+        } else if (video.link.includes('.mp4')) {
+            videoHtml = `<video class="absolute top-0 left-0 w-full h-full object-cover" src="${video.link}" controls></video>`;
+        } else if (video.link !== '') {
+            videoHtml = `<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">Không tìm thấy video</div>`;
+        } else {
+            return;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1';
+        card.innerHTML = `
+            <div class="relative w-full" style="padding-top: 56.25%;">
+                ${videoHtml}
+            </div>
+            <div class="p-5">
+                <h3 class="text-lg font-bold text-gray-900 line-clamp-2">${video.title}</h3>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+let currentDocType = 'thamkhao';
 function switchDocTab(type) {
     currentDocType = type;
     document.getElementById('tab-giangday').className = type === 'giangday' ? 'px-6 py-3 text-lg font-semibold border-b-2 border-blue-900 text-blue-900 transition' : 'px-6 py-3 text-lg font-semibold border-b-2 border-transparent text-gray-500 hover:text-blue-900 transition';
@@ -128,18 +201,42 @@ function renderDocs() {
     const grid = document.getElementById('doc-grid');
     grid.innerHTML = '';
     const filteredDocs = docData.filter(d => d.type === currentDocType);
+    
     if(filteredDocs.length === 0) {
         grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-8">Chưa có tài liệu trong mục này.</p>';
         return;
     }
-    filteredDocs.forEach(doc => {
+    
+    const referenceImages = [
+        "https://images.unsplash.com/photo-1456406644174-8ddd4cd52a06?auto=format&fit=crop&q=80&w=500",
+        "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=500",
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=500",
+        "https://images.unsplash.com/photo-1457369804613-52c61a46b07c?auto=format&fit=crop&q=80&w=500",
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=500"
+    ];
+
+    filteredDocs.forEach((doc, index) => {
         const card = document.createElement('div');
-        card.className = 'flex items-center p-5 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-300 hover:shadow-md transition group';
-        card.innerHTML = `
-            <div class="text-red-500 text-3xl mr-4 group-hover:-translate-y-1 transition"><i class="fa-solid fa-file-pdf"></i></div>
-            <div class="flex-1"><h3 class="text-gray-900 font-semibold text-lg line-clamp-1">${doc.title}</h3></div>
-            <a href="${doc.link}" target="_blank" class="ml-4 text-blue-900 bg-blue-100 hover:bg-blue-900 hover:text-white px-4 py-2 rounded font-medium transition">Tải về</a>
-        `;
+        
+        if (currentDocType === 'thamkhao') {
+            const imgSrc = doc.image ? doc.image : referenceImages[index % referenceImages.length];
+            card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 flex flex-col';
+            card.innerHTML = `
+                <img src="${imgSrc}" alt="Tài liệu" class="w-full h-48 object-cover">
+                <div class="p-5 flex flex-col flex-grow">
+                    <h3 class="text-lg font-bold text-gray-900 line-clamp-2 mb-4 flex-grow">${doc.title}</h3>
+                    <a href="${doc.link}" target="_blank" class="text-center text-blue-900 bg-blue-100 hover:bg-blue-900 hover:text-white px-4 py-2 rounded font-medium transition w-full mt-auto">Xem / Tải về</a>
+                </div>
+            `;
+        } else {
+            card.className = 'flex items-center p-5 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-300 hover:shadow-md transition group h-full';
+            card.innerHTML = `
+                <div class="text-red-500 text-3xl mr-4 group-hover:-translate-y-1 transition"><i class="fa-solid fa-file-pdf"></i></div>
+                <div class="flex-1"><h3 class="text-gray-900 font-semibold text-lg line-clamp-1">${doc.title}</h3></div>
+                <a href="${doc.link}" target="_blank" class="ml-4 text-blue-900 bg-blue-100 hover:bg-blue-900 hover:text-white px-4 py-2 rounded font-medium transition">Tải về</a>
+            `;
+        }
+        
         grid.appendChild(card);
     });
 }
