@@ -57,7 +57,7 @@ window.onload = async () => {
         title: row.c[0]?.v || '',
         link: row.c[1]?.v || '',
         category: row.c[2]?.v || 'Khác'
-    })).filter(v => v.title !== '' && v.title.toLowerCase() !== 'tên video');
+    })).filter(v => (v.title !== '' || v.link !== '') && (!v.title || v.title.toLowerCase() !== 'tên video'));
 
     // Xử lý data Documents (Cột 0: Tên, Cột 1: Link, Cột 2: Loại, Cột 3: Hình ảnh)
     docData = docRows.map(row => ({
@@ -65,20 +65,20 @@ window.onload = async () => {
         link: row.c[1]?.v || '#',
         type: row.c[2]?.v || 'thamkhao',
         image: row.c[3]?.v || ''
-    })).filter(d => d.title !== '' && !d.title.toLowerCase().includes('tên tài liệu'));
+    })).filter(d => (d.title !== '' || d.image !== '') && (!d.title || !d.title.toLowerCase().includes('tên tài liệu')));
 
     // Xử lý data Exams (Cột 0: Tên, Cột 1: Cấp độ, Cột 2: Link)
     examData = examRows.map(row => ({
         title: row.c[0]?.v || '',
         level: row.c[1]?.v || 'Cơ bản',
         link: row.c[2]?.v || '#'
-    })).filter(e => e.title !== '' && !e.title.toLowerCase().includes('tên đề thi'));
+    })).filter(e => e.title !== '' && (!e.title || !e.title.toLowerCase().includes('tên đề thi')));
 
     // Xử lý data Student Videos
     studentVideoData = studentRows.map(row => ({
         title: row.c[0]?.v || '',
         link: row.c[1]?.v || ''
-    })).filter(v => v.title !== '' && !v.title.toLowerCase().includes('tên/mô tả video'));
+    })).filter(v => (v.title !== '' || v.link !== '') && (!v.title || !v.title.toLowerCase().includes('tên/mô tả video')));
 
     // Render ra giao diện (Giữ nguyên logic của Phase 2)
     renderVideoTabs();
@@ -138,7 +138,7 @@ function renderVideos() {
             <div class="relative w-full" style="padding-top: 56.25%;">
                 ${videoHtml}
             </div>
-            <div class="p-5">
+            <div class="${video.title ? 'p-5' : 'hidden'}">
                 <span class="inline-block px-3 py-1 mb-2 text-xs font-semibold text-blue-900 bg-blue-100 rounded-full">${video.category}</span>
                 <h3 class="text-lg font-bold text-gray-900 line-clamp-2">${video.title}</h3>
             </div>
@@ -181,7 +181,7 @@ function renderStudentVideos() {
             <div class="relative w-full" style="padding-top: 56.25%;">
                 ${videoHtml}
             </div>
-            <div class="p-5">
+            <div class="${video.title ? 'p-5' : 'hidden'}">
                 <h3 class="text-lg font-bold text-gray-900 line-clamp-2">${video.title}</h3>
             </div>
         `;
@@ -221,11 +221,15 @@ function renderDocs() {
         if (currentDocType === 'thamkhao') {
             const imgSrc = doc.image ? doc.image : referenceImages[index % referenceImages.length];
             card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1 flex flex-col';
+            const imgClass = (doc.title !== '' || doc.link !== '#') ? "w-full h-48 object-cover" : "w-full h-full object-cover max-h-96";
+            const titleHtml = doc.title ? `<h3 class="text-lg font-bold text-gray-900 line-clamp-2 mb-4 flex-grow">${doc.title}</h3>` : `<div class="flex-grow"></div>`;
+            const linkHtml = (doc.link && doc.link !== '#') ? `<a href="${doc.link}" target="_blank" class="text-center text-blue-900 bg-blue-100 hover:bg-blue-900 hover:text-white px-4 py-2 rounded font-medium transition w-full mt-auto">Xem / Tải về</a>` : '';
+            
             card.innerHTML = `
-                <img src="${imgSrc}" alt="Tài liệu" class="w-full h-48 object-cover">
-                <div class="p-5 flex flex-col flex-grow">
-                    <h3 class="text-lg font-bold text-gray-900 line-clamp-2 mb-4 flex-grow">${doc.title}</h3>
-                    <a href="${doc.link}" target="_blank" class="text-center text-blue-900 bg-blue-100 hover:bg-blue-900 hover:text-white px-4 py-2 rounded font-medium transition w-full mt-auto">Xem / Tải về</a>
+                <img src="${imgSrc}" alt="Tài liệu" class="${imgClass}">
+                <div class="${(doc.title !== '' || doc.link !== '#') ? 'p-5 flex flex-col flex-grow' : 'hidden'}">
+                    ${titleHtml}
+                    ${linkHtml}
                 </div>
             `;
         } else {
